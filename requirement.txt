@@ -1,0 +1,25 @@
+# OCR Module Dependencies - EasyOCR Version
+easyocr>=1.7.0
+Pillow>=10.0.0
+opencv-python>=4.8.0
+pdf2image>=1.16.3
+PyPDF2>=3.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+reportlab>=4.0.0
+torch>=1.9.0
+torchvision>=0.10.0
+
+# Install EasyOCR and dependencies
+pip install easyocr>=1.7.0
+pip install pillow opencv-python pdf2image pandas numpy
+
+# Note: EasyOCR will automatically download language models on first use
+# No need to install Tesseract separately!
+#files added
+Files added:
+- ocr_module/medical_ocr_service.py (EasyOCR implementation)
+- ocr_module/parser.py (text parsing)
+- ocr_module/preprocessor.py (image preprocessing)
+- ocr_module/utils.py (utilities)
+- requirements.txt (EasyOCR dependencies)

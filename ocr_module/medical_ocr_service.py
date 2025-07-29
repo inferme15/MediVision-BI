@@ -15,9 +15,9 @@ import shutil
 # Import your existing modules (same folder)
 try:
     from parser import extract_patient_info, extract_test_values, debug_extraction
-    print("✅ Successfully imported parser functions")
+    print("Successfully imported parser functions")
 except ImportError as e:
-    print(f"❌ Could not import from parser: {e}")
+    print(f"Could not import from parser: {e}")
     def extract_patient_info(text, interactive=False):
         return {'Name': 'Unknown', 'Patient ID': 'Unknown', 'Gender': 'Unknown', 'Age': 'Unknown', 'Test Date': 'Unknown'}
     
@@ -26,19 +26,19 @@ except ImportError as e:
 
 try:
     from preprocessor import ImagePreprocessor
-    print("✅ Successfully imported ImagePreprocessor")
+    print("Successfully imported ImagePreprocessor")
 except ImportError as e:
-    print(f"❌ Could not import ImagePreprocessor: {e}")
+    print(f"Could not import ImagePreprocessor: {e}")
     ImagePreprocessor = None
 
 # For PDF processing, we'll need to handle this differently since you don't have a PDFParser class
 try:
     import pdf2image
     from pdf2image import convert_from_path
-    print("✅ PDF2Image available for PDF processing")
+    print("PDF2Image available for PDF processing")
     PDF_PROCESSING_AVAILABLE = True
 except ImportError:
-    print("❌ PDF2Image not available - install with: pip install pdf2image")
+    print("PDF2Image not available - install with: pip install pdf2image")
     PDF_PROCESSING_AVAILABLE = False
 
 class MedicalOCRService:
@@ -60,19 +60,19 @@ class MedicalOCRService:
         try:
             if ImagePreprocessor:
                 self.preprocessor = ImagePreprocessor()
-                print("✅ ImagePreprocessor initialized")
+                print("ImagePreprocessor initialized")
             else:
                 self.preprocessor = None
-                print("⚠️  ImagePreprocessor not available")
+                print("ImagePreprocessor not available")
         except Exception as e:
             self.preprocessor = None
-            print(f"⚠️  Could not initialize ImagePreprocessor: {e}")
+            print(f"Could not initialize ImagePreprocessor: {e}")
             
         # Check PDF processing availability
         if not PDF_PROCESSING_AVAILABLE:
-            print("⚠️  PDF processing not available. Install pdf2image: pip install pdf2image")
+            print("PDF processing not available. Install pdf2image: pip install pdf2image")
         else:
-            print("✅ PDF processing ready")
+            print("PDF processing ready")
         
     def process_uploaded_file(self, uploaded_file_path, output_dir="./output"):
         """
@@ -125,7 +125,7 @@ class MedicalOCRService:
                     images = convert_from_path(uploaded_file_path, poppler_path=self.poppler_path)
                 else:
                     images = convert_from_path(uploaded_file_path)
-                print(f"✅ Extracted {len(images)} pages from PDF")
+                print(f"Extracted {len(images)} pages from PDF")
             except Exception as e:
                 return {
                     'success': False,
@@ -324,11 +324,11 @@ if __name__ == "__main__":
         )
         
         if result['success']:
-            print("✅ Processing successful!")
+            print("Processing successful!")
             print(f"Patient: {result['patient_info']['Name']}")
             print(f"Tests: {result['num_tests']}")
             print(f"CSV: {result['csv_filename']}")
         else:
-            print(f"❌ Processing failed: {result['error']}")
+            print(f"Processing failed: {result['error']}")
     else:
         print(f"Test file not found: {test_file}")

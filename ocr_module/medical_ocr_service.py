@@ -306,7 +306,7 @@ class MedicalOCRService:
             'status': 'ready'
         }
 
-# Example usage for Member 2
+# Example usage for Member 2 (to verification or testing ,use the above code to integrate into your module) this code is to simply check its working or not
 if __name__ == "__main__":
     # This shows Member 2 how to use your module
     
@@ -332,3 +332,4 @@ if __name__ == "__main__":
             print(f"Processing failed: {result['error']}")
     else:
         print(f"Test file not found: {test_file}")
+

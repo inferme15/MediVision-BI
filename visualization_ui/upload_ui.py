@@ -23,6 +23,12 @@ st.success(f"✅ PDF uploaded successfully to {saved_file_path}")
 st.info("🔄 Running OCR to extract lab data...")
 
 from ocr_module.ocr_main import process_uploaded_pdf
+# Run the OCR process and capture the result
+result = subprocess.run(
+    ["python", "-m", "ocr_module.ocr_main", saved_file_path],
+    capture_output=True,
+    text=True
+)
 if result.returncode == 0:
     st.success("✅ OCR completed successfully!")
     output_path = "data/processed/sample_output.csv"

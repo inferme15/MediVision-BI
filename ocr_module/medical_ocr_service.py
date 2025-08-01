@@ -12,6 +12,10 @@ from datetime import datetime
 import tempfile
 import shutil
 
+# Fix for relative imports when running directly
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+
 # Import your existing modules (same folder)
 try:
     from parser import extract_patient_info, extract_test_values, debug_extraction
@@ -155,8 +159,8 @@ class MedicalOCRService:
             for i, image in enumerate(images):
                 print(f"Processing page {i+1}/{len(images)}")
                 
-                # Preprocess image
-                processed_image = self.preprocessor.preprocess(image)
+                # Preprocess image using the correct method from your ImagePreprocessor
+                processed_image = self._preprocess_image_safely(image)
                 
                 # Extract text using OCR
                 page_text = self._extract_text_from_image(processed_image)
@@ -168,9 +172,9 @@ class MedicalOCRService:
             # Extract test results using your parser functions
             test_results = extract_test_values(all_text)
             
-            # Generate CSV filename
-            patient_name = patient_info.get('Name', 'Unknown').replace(' ', '_')
-            patient_id = patient_info.get('Patient ID', 'Unknown')
+            # Generate CSV filename (fix the newline issue)
+            patient_name = self._sanitize_filename(patient_info.get('Name', 'Unknown'))
+            patient_id = self._sanitize_filename(patient_info.get('Patient ID', 'Unknown'))
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             csv_filename = f"{patient_name}_{patient_id}_{timestamp}.csv"
             csv_path = os.path.join(output_dir, csv_filename)
@@ -205,6 +209,48 @@ class MedicalOCRService:
                 'processing_time': processing_time
             }
     
+    def _preprocess_image_safely(self, image):
+        """
+        Safely preprocess image using your updated ImagePreprocessor
+        """
+        if not self.preprocessor:
+            print("⚠️  No preprocessor available, using original image")
+            return image
+        
+        try:
+            # Use the preprocess method from your updated ImagePreprocessor
+            processed_image = self.preprocessor.preprocess(image, method="medical")
+            print("✅ Image preprocessing completed")
+            return processed_image
+                
+        except Exception as e:
+            print(f"⚠️  Preprocessing failed: {e}, using original image")
+            return image
+    
+
+    
+    def _sanitize_filename(self, filename):
+        """
+        Remove invalid characters from filename
+        """
+        if not filename:
+            return "Unknown"
+        
+        # Remove or replace invalid characters
+        import re
+        # Remove newlines, tabs, and other control characters
+        sanitized = re.sub(r'[\n\r\t\f\v]', '_', str(filename))
+        # Remove other invalid filename characters
+        sanitized = re.sub(r'[<>:"/\\|?*]', '_', sanitized)
+        # Replace spaces with underscores
+        sanitized = sanitized.replace(' ', '_')
+        # Remove multiple consecutive underscores
+        sanitized = re.sub(r'_{2,}', '_', sanitized)
+        # Remove leading/trailing underscores
+        sanitized = sanitized.strip('_')
+        
+        return sanitized if sanitized else "Unknown"
+    
     def process_multiple_files(self, file_paths, output_dir="./output"):
         """
         Process multiple PDF files (batch processing)
@@ -230,29 +276,34 @@ class MedicalOCRService:
     
     def _extract_text_from_image(self, image):
         """
-        Extract text from image using OCR
-        Replace this with your actual OCR implementation
+        Extract text from image using EasyOCR
         """
         try:
-            # Option 1: If using Tesseract
-            import pytesseract
-            text = pytesseract.image_to_string(image, config='--psm 6')
+            import easyocr
+            import numpy as np
+            
+            # Initialize EasyOCR reader
+            reader = easyocr.Reader(['en'])
+            
+            # Convert PIL image to numpy array for EasyOCR
+            image_array = np.array(image)
+            
+            # Extract text
+            results = reader.readtext(image_array)
+            
+            # Combine all text results
+            text = ' '.join([result[1] for result in results])
+            
+            print(f"✅ Extracted {len(results)} text regions")
             return text
             
         except ImportError:
-            try:
-                # Option 2: If using EasyOCR
-                import easyocr
-                reader = easyocr.Reader(['en'])
-                results = reader.readtext(image)
-                text = ' '.join([result[1] for result in results])
-                return text
-                
-            except ImportError:
-                # Option 3: Use your existing OCR method
-                # Replace this with your actual OCR implementation
-                print("Warning: No OCR library found. Please implement OCR method.")
-                return "OCR implementation needed"
+            print("❌ EasyOCR not installed. Install with: pip install easyocr")
+            return "EasyOCR not available"
+            
+        except Exception as e:
+            print(f"❌ OCR extraction failed: {e}")
+            return "OCR extraction failed"
     
     def _save_to_csv(self, patient_info, test_results, csv_path):
         """
@@ -306,29 +357,29 @@ class MedicalOCRService:
             'status': 'ready'
         }
 
-# Example usage for Member 2
-if __name__ == "__main__":
-    # This shows Member 2 how to use your module
+# # Example usage for Member 2
+# if __name__ == "__main__":
+#     # This shows Member 2 how to use your module
     
-    # Initialize OCR service
-    poppler_path = r"C:/Users/GEETHA/Downloads/Release-24.08.0-0/poppler-24.08.0/Library/bin"
-    ocr_service = MedicalOCRService(poppler_path=poppler_path)
+#     # Initialize OCR service
+#     poppler_path = r"C:/Users/GEETHA/Downloads/Release-24.08.0-0/poppler-24.08.0/Library/bin"
+#     ocr_service = MedicalOCRService(poppler_path=poppler_path)
     
-    # Test with sample file
-    test_file = "../sample_reports/Jane_Smith_Lab_Report.pdf"
+#     # Test with sample file
+#     test_file = ""
     
-    if os.path.exists(test_file):
-        result = ocr_service.process_uploaded_file(
-            uploaded_file_path=test_file,
-            output_dir="../output"
-        )
+#     if os.path.exists(test_file):
+#         result = ocr_service.process_uploaded_file(
+#             uploaded_file_path=test_file,
+#             output_dir="../output"
+#         )
         
-        if result['success']:
-            print("✅ Processing successful!")
-            print(f"Patient: {result['patient_info']['Name']}")
-            print(f"Tests: {result['num_tests']}")
-            print(f"CSV: {result['csv_filename']}")
-        else:
-            print(f"❌ Processing failed: {result['error']}")
-    else:
-        print(f"Test file not found: {test_file}")
+#         if result['success']:
+#             print("✅ Processing successful!")
+#             print(f"Patient: {result['patient_info']['Name']}")
+#             print(f"Tests: {result['num_tests']}")
+#             print(f"CSV: {result['csv_filename']}")
+#         else:
+#             print(f"❌ Processing failed: {result['error']}")
+#     else:
+#         print(f"Test file not found: {test_file}")

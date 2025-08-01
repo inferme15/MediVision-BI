@@ -306,30 +306,30 @@
 #             'status': 'ready'
 #         }
 
-# # Example usage for Member 2 (to verification or testing ,use the above code to integrate into your module) this code is to simply check its working or not
-# if __name__ == "__main__":
-#     # This shows Member 2 how to use your module
+# Example usage for Member 2 (to verification or testing ,use the above code to integrate into your module) this code is to simply check its working or not
+if __name__ == "__main__":
+    # This shows Member 2 how to use your module
     
-#     # Initialize OCR service
-#     poppler_path = r"C:/Users/GEETHA/Downloads/Release-24.08.0-0/poppler-24.08.0/Library/bin"
-#     ocr_service = MedicalOCRService(poppler_path=poppler_path)
+    # Initialize OCR service
+    poppler_path = r"C:/Users/GEETHA/Downloads/Release-24.08.0-0/poppler-24.08.0/Library/bin"
+    ocr_service = MedicalOCRService(poppler_path=poppler_path)
     
-#     # Test with sample file
-#     test_file = "../sample_reports/Jane_Smith_Lab_Report.pdf"
+    # Test with sample file
+    test_file = "../sample_reports/Jane_Smith_Lab_Report.pdf"
     
-#     if os.path.exists(test_file):
-#         result = ocr_service.process_uploaded_file(
-#             uploaded_file_path=test_file,
-#             output_dir="../output"
-#         )
+    if os.path.exists(test_file):
+        result = ocr_service.process_uploaded_file(
+            uploaded_file_path=test_file,
+            output_dir="../output"
+        )
         
-#         if result['success']:
-#             print("Processing successful!")
-#             print(f"Patient: {result['patient_info']['Name']}")
-#             print(f"Tests: {result['num_tests']}")
-#             print(f"CSV: {result['csv_filename']}")
-#         else:
-#             print(f"Processing failed: {result['error']}")
-#     else:
-#         print(f"Test file not found: {test_file}")
+        if result['success']:
+            print("Processing successful!")
+            print(f"Patient: {result['patient_info']['Name']}")
+            print(f"Tests: {result['num_tests']}")
+            print(f"CSV: {result['csv_filename']}")
+        else:
+            print(f"Processing failed: {result['error']}")
+    else:
+        print(f"Test file not found: {test_file}")
 

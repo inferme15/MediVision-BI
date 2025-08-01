@@ -1,7 +1,7 @@
 import streamlit as st
 import os
-import tempfile
 import sys
+import uuid
 
 # ✅ Add parent directory to Python path so we can import from ocr_module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -21,9 +21,13 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
 
 if uploaded_file is not None:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf", dir=UPLOAD_DIR) as tmp:
-        tmp.write(uploaded_file.read())
-        saved_pdf_path = tmp.name
+    # ✅ Save using original filename with UUID to avoid overwriting
+    original_filename = os.path.splitext(uploaded_file.name)[0]
+    safe_filename = f"{original_filename}_{uuid.uuid4().hex[:6]}.pdf"
+    saved_pdf_path = os.path.join(UPLOAD_DIR, safe_filename)
+
+    with open(saved_pdf_path, "wb") as f:
+        f.write(uploaded_file.read())
 
     st.success(f"✅ File uploaded: `{saved_pdf_path}`")
 
